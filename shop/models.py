@@ -48,6 +48,9 @@ class CartItem(models.Model):
     def get_total_item_price(self):
         return self.product.price * self.quantity
 
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} for {self.user.username}"
+
 
 class Wishlist(models.Model):
     user = models.ForeignKey(
@@ -164,6 +167,9 @@ class Order(models.Model):
     shipping_address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Order #{self.pk} - {self.user.username}"
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -177,6 +183,10 @@ class OrderItem(models.Model):
 
     def get_total_price(self):
         return self.price * self.quantity
+
+    def __str__(self):
+        product_name = self.product.name if self.product else "Deleted product"
+        return f"{self.quantity} x {product_name}"
 
 
 class Review(models.Model):

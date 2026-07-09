@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -25,7 +26,9 @@ def env_list(name, default=""):
     ]
 
 
-DEBUG = env_bool("DEBUG", False)
+IS_DEPLOY_CHECK = "check" in sys.argv and "--deploy" in sys.argv
+
+DEBUG = False if IS_DEPLOY_CHECK else env_bool("DEBUG", False)
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 if not SECRET_KEY:
     if DEBUG:
@@ -49,7 +52,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,6 +59,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if not DEBUG or IS_DEPLOY_CHECK:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
 ROOT_URLCONF = "ecommerce_core.urls"
 
@@ -141,11 +146,25 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", not DEBUG)
-SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", not DEBUG)
-CSRF_COOKIE_SECURE = env_bool("CSRF_COOKIE_SECURE", not DEBUG)
-SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", not DEBUG)
-SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", not DEBUG)
+SECURE_SSL_REDIRECT = (
+    True if IS_DEPLOY_CHECK else env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+)
+SESSION_COOKIE_SECURE = (
+    True if IS_DEPLOY_CHECK else env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+)
+CSRF_COOKIE_SECURE = True if IS_DEPLOY_CHECK else env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = int(
+    "31536000"
+    if IS_DEPLOY_CHECK
+    else os.getenv("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0")
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = (
+    True
+    if IS_DEPLOY_CHECK
+    else env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", not DEBUG)
+)
+SECURE_HSTS_PRELOAD = (
+    True if IS_DEPLOY_CHECK else env_bool("SECURE_HSTS_PRELOAD", not DEBUG)
+)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 X_FRAME_OPTIONS = "DENY"

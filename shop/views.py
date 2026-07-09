@@ -20,7 +20,7 @@ from django.db.models import Avg, Count, F, Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_POST
 
 from .models import (
     Address,
@@ -296,7 +296,7 @@ def newsletter_subscribe(request):
     return JsonResponse({"success": True, "message": "Thanks for subscribing!"})
 
 
-@require_http_methods(["GET", "POST"])
+@require_POST
 def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out successfully.")

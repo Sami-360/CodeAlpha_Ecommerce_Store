@@ -1,56 +1,70 @@
-# Ecommerce_Store
+# Ecommerce Store
 
-A Django-based computer hardware e-commerce store with product browsing, authentication, wishlist, cart management, coupons, checkout, order history, reviews, and an admin panel for managing store data.
+A polished Django ecommerce application for a computer hardware store. The app supports catalog browsing, product detail pages, wishlist, cart, checkout, coupons, profiles, order tracking, PDF invoices, static pages, and store/admin analytics.
 
-## Tech Stack
+## Screenshots
 
-- Python
-- Django
-- SQLite
-- Bootstrap 5
-- Bootstrap Icons
-- Pillow
-- reportlab
-- python-dotenv
+Add screenshots after deployment or local capture:
+
+- `docs/screenshots/homepage.png`
+- `docs/screenshots/product-detail.png`
+- `docs/screenshots/cart-checkout.png`
+- `docs/screenshots/admin-dashboard.png`
 
 ## Features
 
-- Product listing with category filtering and sorting
-- Product search and pagination
-- Product detail pages with gallery images and Open Graph metadata
-- Customer reviews, star ratings, and related products
-- User registration, login, and logout
-- Wishlist management with AJAX toggles
-- Shopping cart with AJAX add-to-cart and quantity update support
-- Coupon codes, tax calculation, shipping fees, and checkout pricing breakdown
-- Checkout with address selection and order creation
-- Order history and PDF invoice generation
-- Contact form for customer messages
-- Newsletter subscription via AJAX
-- Custom 404 and 500 error pages
-- Admin analytics dashboard and Django admin management
-- Session-based login rate limiting for security
-- Product list caching and query optimizations for performance
-- Image upload validation to enforce a 5MB file size limit
-- Catalog seeding command for laptops, processors, graphics cards, memory, storage, and PC tools
+- Product catalog with search, category filtering, sorting, and pagination
+- Product detail pages with gallery support, reviews, ratings, related products, SEO metadata, and Open Graph tags
+- Graceful product image fallback for missing uploaded images
+- User registration with first name, last name, unique email, username, and password
+- Login/logout messaging and session-based login rate limiting
+- Wishlist/favorites with AJAX toggle buttons
+- Shopping cart with AJAX add-to-cart and quantity updates
+- Coupon validation, tax, shipping, and full checkout price breakdown
+- Checkout with saved address selection and optional new address saving
+- Order history, order detail status timeline, and downloadable PDF invoices
+- Console email backend for local order confirmation testing
+- User profile and address book
+- Contact form and newsletter subscriber capture
+- About, contact, privacy policy, terms of service, 404, and 500 pages
+- Staff-only analytics dashboard with revenue, order status counts, low stock products, recent orders, and Chart.js top-seller chart
+- Custom Django admin styling with light/dark theme token support
+- Demo catalog seeding command for tech products and coupons
+- Image upload size validation
+- WhiteNoise static-file support for production hosting
 
-## Folder Structure
+## Tech Stack
+
+- Python 3.12
+- Django 6
+- SQLite for local development
+- Bootstrap 5 and Bootstrap Icons
+- Chart.js
+- Pillow
+- ReportLab
+- python-dotenv
+- WhiteNoise
+- Gunicorn
+
+## Project Structure
 
 ```text
 Ecommerce_Store/
 |-- .env.example
 |-- .gitignore
+|-- Procfile
+|-- README.md
+|-- manage.py
+|-- requirements.txt
+|-- runtime.txt
 |-- docs/
 |   `-- API_endpoints.md
 |-- ecommerce_core/
 |   |-- __init__.py
+|   |-- asgi.py
 |   |-- settings.py
 |   |-- urls.py
-|   |-- asgi.py
 |   `-- wsgi.py
-|-- media/
-|   `-- products/
-|       `-- gallery/
 |-- shop/
 |   |-- __init__.py
 |   |-- admin.py
@@ -76,50 +90,54 @@ Ecommerce_Store/
 |   |   |-- 0005_contactmessage_newslettersubscriber.py
 |   |   |-- 0006_alter_product_image_alter_productimage_image.py
 |   |   |-- 0007_alter_address_options.py
+|   |   |-- 0008_product_image_url.py
 |   |   `-- __init__.py
 |   |-- static/
 |   |   `-- shop/
 |   |       |-- css/
+|   |       |   |-- admin.css
 |   |       |   |-- base.css
 |   |       |   `-- wishlist.css
 |   |       `-- js/
 |   |           |-- cart.js
 |   |           `-- wishlist.js
-|   |-- templates/
-|   |   |-- base.html
-|   |   |-- registration/
-|   |   |   |-- login.html
-|   |   |   `-- register.html
-|   |   |-- shop/
-|   |   |   |-- about.html
-|   |   |   |-- admin_dashboard.html
-|   |   |   |-- cart.html
-|   |   |   |-- checkout.html
-|   |   |   |-- contact.html
-|   |   |   |-- order_detail.html
-|   |   |   |-- order_history.html
-|   |   |   |-- order_success.html
-|   |   |   |-- privacy_policy.html
-|   |   |   |-- product_detail.html
-|   |   |   |-- product_list.html
-|   |   |   |-- profile.html
-|   |   |   |-- terms_of_service.html
-|   |   |   `-- wishlist.html
-|-- templates/
-|   |-- 404.html
-|   `-- 500.html
-|-- manage.py
-|-- requirements.txt
-`-- README.md
+|   `-- templates/
+|       |-- base.html
+|       |-- registration/
+|       |   |-- login.html
+|       |   `-- register.html
+|       `-- shop/
+|           |-- about.html
+|           |-- admin_dashboard.html
+|           |-- cart.html
+|           |-- checkout.html
+|           |-- contact.html
+|           |-- order_detail.html
+|           |-- order_history.html
+|           |-- order_success.html
+|           |-- privacy_policy.html
+|           |-- product_detail.html
+|           |-- product_list.html
+|           |-- profile.html
+|           |-- terms_of_service.html
+|           `-- wishlist.html
+`-- templates/
+    |-- 404.html
+    |-- 500.html
+    `-- admin/
+        |-- base_site.html
+        `-- index.html
 ```
 
-## Setup
+Local runtime folders such as `.venv/`, `db.sqlite3`, `.env`, `media/`, `staticfiles/`, and Python cache folders are intentionally ignored by Git.
+
+## Local Setup
 
 1. Create and activate a virtual environment:
 
 ```powershell
-python -m venv venv
-.\venv\Scripts\activate
+python -m venv .venv
+.\.venv\Scripts\activate
 ```
 
 2. Install dependencies:
@@ -128,32 +146,40 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file:
+3. Create a local environment file:
 
-```env
-SECRET_KEY=your-secret-key-here
-DEBUG=True
+```powershell
+Copy-Item .env.example .env
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-4. Run migrations:
+Put the generated key in `.env`:
+
+```env
+SECRET_KEY=replace-with-generated-key
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+CSRF_TRUSTED_ORIGINS=
+SECURE_SSL_REDIRECT=False
+```
+
+4. Apply migrations:
 
 ```powershell
 python manage.py migrate
 ```
 
-5. Create an admin user:
+5. Create an admin account:
 
 ```powershell
 python manage.py createsuperuser
 ```
 
-6. Seed catalog products and coupons:
+6. Seed the demo catalog and coupons:
 
 ```powershell
 python manage.py seed_products
 ```
-
-The seeder clears old product media and assigns external tech photo URLs for laptops, CPUs, GPUs, memory, storage, and PC tools. Uploaded local images still work through Django admin when needed.
 
 Sample coupon codes:
 
@@ -161,6 +187,7 @@ Sample coupon codes:
 WELCOME10
 EID20
 FREESHIP15
+RAMADAN25
 ```
 
 7. Start the development server:
@@ -169,22 +196,58 @@ FREESHIP15
 python manage.py runserver
 ```
 
-8. Open the app:
+Open:
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-Admin panel:
+Admin:
 
 ```text
 http://127.0.0.1:8000/admin/
 ```
 
-## Tests
-
-Run the test suite:
+## Useful Commands
 
 ```powershell
+python manage.py check
+python manage.py check --deploy
+python manage.py makemigrations --check --dry-run
+python manage.py migrate
 python manage.py test
+python manage.py seed_products
+python manage.py collectstatic
 ```
+
+## Deployment
+
+This project includes a `Procfile`, `runtime.txt`, Gunicorn, and WhiteNoise for platforms such as Render or Railway.
+
+Set these production environment variables on the hosting platform:
+
+```env
+SECRET_KEY=<strong-production-secret>
+DEBUG=False
+ALLOWED_HOSTS=<your-domain>,<your-service-hostname>
+CSRF_TRUSTED_ORIGINS=https://<your-domain>
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=True
+```
+
+Run migrations and collect static files during deployment:
+
+```powershell
+python manage.py migrate
+python manage.py collectstatic --noinput
+```
+
+## Notes
+
+- Uploaded files in `media/` are local runtime data and are ignored by Git.
+- SQLite is suitable for local development. Use a managed production database for real deployments.
+- The email backend is configured for console output in development.

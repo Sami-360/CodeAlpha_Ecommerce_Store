@@ -15,7 +15,9 @@
                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3" data-wishlist-card>
                     <article class="card product-card h-100">
                         <a href="{% url 'product_detail' item.product.pk %}" class="text-decoration-none text-dark">
-                            {% if item.product.image %}
+                            {% if item.product.image_url %}
+                                <img src="{{ item.product.image_url }}" class="card-img-top product-image" alt="{{ item.product.name }}" loading="lazy">
+                            {% elif item.product.image %}
                                 <img src="{{ item.product.image.url }}" class="card-img-top product-image" alt="{{ item.product.name }}">
                             {% else %}
                                 <div class="product-placeholder">

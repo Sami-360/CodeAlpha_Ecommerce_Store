@@ -28,7 +28,9 @@
                                 <tr data-cart-row data-update-url="{% url 'update_cart_quantity' item.id %}">
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
-                                            {% if item.product.image %}
+                                            {% if item.product.image_url %}
+                                                <img src="{{ item.product.image_url }}" class="cart-thumb" alt="{{ item.product.name }}" loading="lazy">
+                                            {% elif item.product.image %}
                                                 <img src="{{ item.product.image.url }}" class="cart-thumb" alt="{{ item.product.name }}">
                                             {% else %}
                                                 <div class="cart-thumb product-placeholder">
