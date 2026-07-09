@@ -192,7 +192,7 @@ RAMADAN25
 
 7. Start the development server:
 
-```powershell
+```Windows PowerShell
 python manage.py runserver
 ```
 
