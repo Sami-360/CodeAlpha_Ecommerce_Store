@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Ecommerce Store{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Analytics Dashboard</h1>
+        <a href="{% url 'admin:index' %}" class="btn btn-outline-primary">Django Admin</a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Revenue</p>
+                    <h2 class="h3 mb-0">$ {{ total_revenue|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Orders</p>
+                    <h2 class="h3 mb-0">{{ total_orders }}</h2>
+                    <p class="small text-muted mb-0">Processing: {{ processing_count }} | Completed: {{ completed_count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Pending Orders</p>
+                    <h2 class="h3 mb-0">{{ pending_count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Top 5 Best-Selling Products</h2>
+                    <canvas id="topProductsChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Low Stock Alerts</h2>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-end">Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in low_stock_products %}
+                                    <tr>
+                                        <td>{{ product.name }}</td>
+                                        <td class="text-end">{{ product.stock }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="2" class="text-muted">No low-stock products.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Recent Orders</h2>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td><a href="{% url 'admin:shop_order_change' order.id %}">#{{ order.id }}</a></td>
+                                <td>{{ order.user.username }}</td>
+                                <td><span class="badge text-bg-light border">{{ order.status }}</span></td>
+                                <td>$ {{ order.total_amount|floatformat:2 }}</td>
+                                <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-muted">No orders yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const topProductLabels = {{ top_product_labels|safe }};
+    const topProductValues = {{ top_product_values|safe }};
+    const chartElement = document.getElementById("topProductsChart");
+
+    if (chartElement) {
+        new Chart(chartElement, {
+            type: "bar",
+            data: {
+                labels: topProductLabels,
+                datasets: [{
+                    label: "Quantity Sold",
+                    data: topProductValues,
+                    backgroundColor: "#2563eb",
+                }],
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                    },
+                },
+            },
+        });
+    }
+</script>
+{% endblock %}

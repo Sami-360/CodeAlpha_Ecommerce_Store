@@ -1,0 +1,52 @@
+# Environment
+.env
+.venv/
+venv/
+.venv copy/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Django/local runtime
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+# SQLite and local DBs
+*.db
+
+# Node
+node_modules/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.iml
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Tests / caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Logs
+*.log
+.runserver.*
+admin_index*.html
+temp_*.py
+
+# Packaging
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# Virtualenvs
+.envrc

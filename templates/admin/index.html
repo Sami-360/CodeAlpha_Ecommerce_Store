@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="store-admin-home">
+  <section class="store-admin-panel store-admin-welcome">
+    <div>
+      <p class="store-admin-kicker">Ecommerce Store Admin</p>
+      <h1>Store Management</h1>
+      <p>Use the left sidebar for full model navigation, or jump into the most common store tasks below.</p>
+    </div>
+    <a class="store-admin-primary" href="{% url 'admin_dashboard' %}">Analytics Dashboard</a>
+  </section>
+
+  <section class="store-admin-grid" aria-label="Admin shortcuts">
+    <a class="store-admin-card" href="{% url 'admin:shop_product_changelist' %}">
+      <span class="store-admin-icon">01</span>
+      <strong>Products</strong>
+      <small>Manage tech catalog, stock, pricing, and image links.</small>
+    </a>
+    <a class="store-admin-card" href="{% url 'admin:shop_order_changelist' %}">
+      <span class="store-admin-icon">02</span>
+      <strong>Orders</strong>
+      <small>Review order status, totals, invoices, and order items.</small>
+    </a>
+    <a class="store-admin-card" href="{% url 'admin:auth_user_changelist' %}">
+      <span class="store-admin-icon">03</span>
+      <strong>Users</strong>
+      <small>Manage customers, staff accounts, permissions, and groups.</small>
+    </a>
+    <a class="store-admin-card" href="{% url 'admin:shop_coupon_changelist' %}">
+      <span class="store-admin-icon">04</span>
+      <strong>Coupons</strong>
+      <small>Control discount codes, limits, active dates, and usage.</small>
+    </a>
+    <a class="store-admin-card" href="{% url 'admin:shop_contactmessage_changelist' %}">
+      <span class="store-admin-icon">05</span>
+      <strong>Messages</strong>
+      <small>Read customer support messages and contact requests.</small>
+    </a>
+    <a class="store-admin-card" href="{% url 'admin:shop_newslettersubscriber_changelist' %}">
+      <span class="store-admin-icon">06</span>
+      <strong>Subscribers</strong>
+      <small>View newsletter signups collected from the storefront.</small>
+    </a>
+  </section>
+</div>
+{% endblock %}

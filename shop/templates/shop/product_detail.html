@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} | Ecommerce Store{% endblock %}
+{% block meta_description %}{{ product.description|truncatechars:150 }}{% endblock %}
+{% block open_graph %}
+<meta property="og:title" content="{{ product.name }} | Ecommerce Store" />
+<meta property="og:description" content="{{ product.description|truncatechars:150 }}" />
+<meta property="og:type" content="product" />
+{% if product.image_url %}
+<meta property="og:image" content="{{ product.image_url }}" />
+{% elif product.image %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}" />
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-6">
+            {% if gallery_images %}
+                <div id="productGallery" class="carousel slide product-gallery">
+                    <div class="carousel-inner">
+                        {% for gallery_image in gallery_images %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ gallery_image.image.url }}" class="d-block w-100 product-detail-image rounded" alt="{{ product.name }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if gallery_images|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productGallery" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productGallery" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    {% endif %}
+                </div>
+            {% elif product.image_url %}
+                <img src="{{ product.image_url }}" class="img-fluid rounded product-detail-image" alt="{{ product.name }}">
+            {% elif product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded product-detail-image" alt="{{ product.name }}">
+            {% else %}
+                <div class="product-placeholder product-detail-placeholder">
+                    {{ product.name|slice:":2"|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <p class="text-muted mb-2">{{ product.category|default:"Product" }}</p>
+            <div class="d-flex align-items-start justify-content-between gap-3">
+                <h1 class="display-6 mb-0">{{ product.name }}</h1>
+                <button
+                    type="button"
+                    class="wishlist-toggle-btn detail-wishlist-btn {% if is_wishlisted %}is-active{% endif %}"
+                    data-wishlist-url="{% url 'toggle_wishlist' product.id %}"
+                    aria-pressed="{% if is_wishlisted %}true{% else %}false{% endif %}"
+                    title="Toggle wishlist"
+                >
+                    <i class="bi {% if is_wishlisted %}bi-heart-fill{% else %}bi-heart{% endif %}" aria-hidden="true"></i>
+                    <span class="visually-hidden">Toggle wishlist</span>
+                </button>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 my-3">
+                <p class="product-price fs-3 mb-0">${{ product.price }}</p>
+                <span class="rating-summary">
+                    {% if average_rating %}
+                        &starf; {{ average_rating|floatformat:1 }}/5
+                    {% else %}
+                        No reviews yet
+                    {% endif %}
+                </span>
+                <span class="text-muted small">{{ review_count }} review{{ review_count|pluralize }}</span>
+            </div>
+            <p class="lead">{{ product.description }}</p>
+            <p class="fw-semibold {% if product.stock > 0 %}text-success{% else %}text-danger{% endif %}">
+                {% if product.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}
+            </p>
+
+            {% if product.stock > 0 %}
+                <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-end mt-4">
+                    <div>
+                        <label for="product-quantity" class="form-label">Quantity</label>
+                        <input id="product-quantity" type="number" class="form-control quantity-input" value="1" min="1" max="{{ product.stock }}">
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary add-to-cart-btn"
+                        data-add-to-cart-url="{% url 'add_to_cart' product.id %}"
+                        data-quantity-input="#product-quantity"
+                    >
+                        Add to Cart
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-5 mt-4">
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Reviews</h2>
+                <span class="text-muted small">{{ review_count }} total</span>
+            </div>
+
+            {% if reviews %}
+                <div class="review-list">
+                    {% for review in reviews %}
+                        <article class="review-item">
+                            <div class="d-flex justify-content-between gap-3">
+                                <div>
+                                    <h3 class="h6 mb-1">{{ review.user.username }}</h3>
+                                    <p class="rating-stars mb-2">
+                                        {% if review.rating == 5 %}&starf;&starf;&starf;&starf;&starf;{% elif review.rating == 4 %}&starf;&starf;&starf;&starf;&star;{% elif review.rating == 3 %}&starf;&starf;&starf;&star;&star;{% elif review.rating == 2 %}&starf;&starf;&star;&star;&star;{% else %}&starf;&star;&star;&star;&star;{% endif %}
+                                    </p>
+                                </div>
+                                <time class="text-muted small" datetime="{{ review.created_at|date:'c' }}">{{ review.created_at|date:"M d, Y" }}</time>
+                            </div>
+                            <p class="mb-0">{{ review.comment }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state py-4">
+                    <h3 class="h5">No reviews yet</h3>
+                    <p class="text-muted mb-0">Be the first customer to share feedback.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+            <div class="review-form-panel">
+                <h2 class="h5 mb-3">Write a Review</h2>
+                {% if user.is_authenticated %}
+                    {% if user_has_reviewed %}
+                        <p class="text-muted mb-0">You have already reviewed this product.</p>
+                    {% else %}
+                        <form method="post" action="{% url 'add_review' product.pk %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="{{ review_form.rating.id_for_label }}" class="form-label">Rating</label>
+                                {{ review_form.rating }}
+                                {{ review_form.rating.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ review_form.comment.id_for_label }}" class="form-label">Comment</label>
+                                {{ review_form.comment }}
+                                {{ review_form.comment.errors }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted mb-3">Log in to share your experience with this product.</p>
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">Login to Review</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if related_products %}
+        <section class="mt-5">
+            <h2 class="h4 mb-3">Related Products</h2>
+            <div class="row g-4">
+                {% for related in related_products %}
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="card product-card h-100">
+                            <a href="{% url 'product_detail' related.pk %}" class="text-decoration-none text-dark">
+                                {% if related.image_url %}
+                                    <img src="{{ related.image_url }}" class="card-img-top product-image" alt="{{ related.name }}" loading="lazy">
+                                {% elif related.image %}
+                                    <img src="{{ related.image.url }}" class="card-img-top product-image" alt="{{ related.name }}">
+                                {% else %}
+                                    <div class="product-placeholder">
+                                        {{ related.name|slice:":2"|upper }}
+                                    </div>
+                                {% endif %}
+                            </a>
+                            <div class="card-body">
+                                <h3 class="h6 card-title">{{ related.name }}</h3>
+                                <p class="product-price mb-0">${{ related.price }}</p>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Products | Ecommerce Store{% endblock %}
+
+{% block content %}
+<section class="container">
+  <div
+    class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4"
+  >
+    <div>
+      <h1 class="display-5 fw-bold mb-1">Products</h1>
+      {% if search_query %}
+      <p class="text-muted mb-0">
+        Showing {{ result_count }} result{{ result_count|pluralize }} for "{{ search_query }}".
+        <a href="{% url 'product_list' %}">Clear Search</a>
+      </p>
+      {% else %}
+      <p class="text-muted mb-0">
+        Browse laptops, CPUs, GPUs, RAM, storage, power supplies, coolers, and repair tools.
+      </p>
+      {% endif %}
+    </div>
+    <div class="catalog-controls d-flex flex-column flex-sm-row gap-3">
+      <div class="catalog-control">
+        <label for="category-filter" class="form-label mb-1">Category</label>
+        <select
+          id="category-filter"
+          class="form-select"
+          onchange="window.location.href = this.value"
+        >
+          <option value="{{ all_categories_url }}" {% if not selected_category %}selected{% endif %}>
+            All categories
+          </option>
+          {% for category in category_options %}
+          <option value="{{ category.url }}" {% if category.selected %}selected{% endif %}>
+            {{ category.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="catalog-control">
+        <label for="sort-filter" class="form-label mb-1">Sort</label>
+        <select
+          id="sort-filter"
+          class="form-select"
+          onchange="window.location.href = this.value"
+        >
+          {% for option in sort_options %}
+          <option value="{{ option.url }}" {% if selected_sort == option.value %}selected{% endif %}>
+            {{ option.label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  {% if products %}
+  <div class="row g-4">
+    {% for product in products %}
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <article class="card product-card h-100">
+        <button
+          type="button"
+          class="wishlist-toggle-btn {% if product.id in wishlisted_product_ids %}is-active{% endif %}"
+          data-wishlist-url="{% url 'toggle_wishlist' product.id %}"
+          aria-pressed="{% if product.id in wishlisted_product_ids %}true{% else %}false{% endif %}"
+          title="Toggle wishlist"
+        >
+          <i class="bi bi-heart" aria-hidden="true"></i>
+          <i class="bi bi-heart-fill" aria-hidden="true"></i>
+          <span class="visually-hidden">Toggle wishlist</span>
+        </button>
+        <a
+          href="{% url 'product_detail' product.pk %}"
+          class="text-decoration-none text-dark"
+        >
+          {% if product.image_url %}
+          <img
+            src="{{ product.image_url }}"
+            class="card-img-top product-image"
+            alt="{{ product.name }}"
+            loading="lazy"
+          />
+          {% elif product.image %}
+          <img
+            src="{{ product.image.url }}"
+            class="card-img-top product-image"
+            alt="{{ product.name }}"
+            loading="lazy"
+          />
+          {% else %}
+          <div class="product-placeholder">
+            {{ product.name|slice:":2"|upper }}
+          </div>
+          {% endif %}
+        </a>
+        <div class="card-body d-flex flex-column">
+          <p class="text-muted small mb-1">
+            {{ product.category|default:"Product" }}
+          </p>
+          <h2 class="h5 card-title">{{ product.name }}</h2>
+          <p class="product-description small text-muted">
+            {{ product.description|truncatechars:95 }}
+          </p>
+          <p class="product-price mb-3">${{ product.price }}</p>
+          <button
+            type="button"
+            class="btn btn-primary mt-auto add-to-cart-btn"
+            data-add-to-cart-url="{% url 'add_to_cart' product.id %}"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </article>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-5" aria-label="Product pagination">
+    <ul class="pagination justify-content-center flex-wrap gap-1">
+      <li
+        class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"
+      >
+        {% if page_obj.has_previous %}
+        <a class="page-link" href="{{ previous_page_url }}">Previous</a>
+        {% else %}
+        <span class="page-link">Previous</span>
+        {% endif %}
+      </li>
+      {% for link in page_links %}
+      <li class="page-item {% if link.active %}active{% endif %}">
+        {% if link.active %}
+        <span class="page-link">{{ link.number }}</span>
+        {% else %}
+        <a class="page-link" href="{{ link.url }}">{{ link.number }}</a>
+        {% endif %}
+      </li>
+      {% endfor %}
+      <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+        {% if page_obj.has_next %}
+        <a class="page-link" href="{{ next_page_url }}">Next</a>
+        {% else %}
+        <span class="page-link">Next</span>
+        {% endif %}
+      </li>
+    </ul>
+  </nav>
+  {% endif %} {% else %}
+  <div class="empty-state text-center py-5">
+    {% if search_query %}
+    <h2 class="h4">No products found for "{{ search_query }}"</h2>
+    <p class="text-muted mb-0">
+      Try searching for something else or
+      <a href="{% url 'product_list' %}">clear the search</a>.
+    </p>
+    {% else %}
+    <h2 class="h4">No products found</h2>
+    <p class="text-muted mb-0">
+      Try another category, or add products from the admin panel.
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

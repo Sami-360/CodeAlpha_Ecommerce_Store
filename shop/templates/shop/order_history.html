@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Orders | Ecommerce Store{% endblock %}
+
+{% block content %}
+<section class="container">
+    <h1 class="h2 mb-4">Order History</h1>
+
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td><a href="{% url 'order_detail' order.pk %}">#{{ order.id }}</a></td>
+                            <td>{{ order.created_at|date:"M d, Y" }}</td>
+                            <td>$ {{ order.total_amount }}</td>
+                            <td><span class="badge text-bg-light border">{{ order.status }}</span></td>
+                            <td class="text-end"><a href="{% url 'order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state text-center py-5">
+            <h2 class="h4">No orders yet</h2>
+            <p class="text-muted">Your completed orders will appear here.</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary">Start Shopping</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

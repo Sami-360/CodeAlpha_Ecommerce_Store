@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Cart | Ecommerce Store{% endblock %}
+
+ {% block content %}
+<section class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Your Cart</h1>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary">Continue Shopping</a>
+    </div>
+
+    {% if items %}
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-8">
+                <div class="table-responsive">
+                    <table class="table align-middle cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr data-cart-row data-update-url="{% url 'update_cart_quantity' item.id %}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" class="cart-thumb" alt="{{ item.product.name }}">
+                                            {% else %}
+                                                <div class="cart-thumb product-placeholder">
+                                                    {{ item.product.name|slice:":2"|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <a href="{% url 'product_detail' item.product.pk %}" class="fw-semibold text-decoration-none text-dark">
+                                                {{ item.product.name }}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>$ {{ item.product.price }}</td>
+                                    <td>
+                                        <div class="quantity-stepper">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cart-quantity-btn" data-action="decrement">-</button>
+                                            <input type="number" class="form-control form-control-sm cart-quantity-input" value="{{ item.quantity }}" min="1">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cart-quantity-btn" data-action="increment">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="fw-semibold" data-item-total>$ {{ item.get_total_item_price }}</td>
+                                    <td class="text-end">
+                                        <form action="{% url 'remove_from_cart' item.id %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="cart-summary ms-lg-auto">
+                    <h2 class="h5 mb-3">Coupon</h2>
+                    <form method="post" action="{% url 'apply_coupon' %}" class="mb-4">
+                        {% csrf_token %}
+                        <label for="coupon-code" class="form-label">Coupon code</label>
+                        <div class="input-group">
+                            <input id="coupon-code" name="coupon_code" class="form-control" value="{{ pricing.coupon_code }}" placeholder="WELCOME10">
+                            <button type="submit" class="btn btn-outline-primary">Apply</button>
+                        </div>
+                        {% if pricing.coupon %}
+                            <button type="submit" name="coupon_code" value="" class="btn btn-link px-0 mt-1">Remove coupon</button>
+                        {% endif %}
+                    </form>
+
+                    <h2 class="h5 mb-3">Order Summary</h2>
+                    <div class="price-breakdown">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span data-cart-subtotal>$ {{ pricing.subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Discount{% if pricing.coupon %} ({{ pricing.coupon.code }}){% endif %}</span>
+                            <span data-cart-discount>- $ {{ pricing.discount }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tax (5%)</span>
+                            <span data-cart-tax>$ {{ pricing.tax }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Shipping</span>
+                            <span data-cart-shipping>{% if pricing.shipping %}$ {{ pricing.shipping }}{% else %}Free{% endif %}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <span class="fw-semibold">Total</span>
+                            <strong class="fs-4" data-cart-total>$ {{ pricing.grand_total }}</strong>
+                        </div>
+                    </div>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100 mt-4">Proceed to Checkout</a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state text-center py-5">
+            <h2 class="h4">Your cart is empty</h2>
+            <p class="text-muted">Add a product to begin checkout.</p>
+            <a href="{% url 'product_list' %}" class="btn btn-primary">Shop Products</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

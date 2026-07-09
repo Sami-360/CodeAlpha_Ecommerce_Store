@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} | Ecommerce Store{% endblock %}
+
+{% block content %}
+<section class="container my-5">
+  <div class="row">
+    <div class="col-lg-9 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex flex-column flex-md-row justify-content-between gap-3">
+          <div>
+            <h1 class="h4 mb-1">Order #{{ order.id }}</h1>
+            <p class="text-muted mb-0">
+              Placed on {{ order.created_at|date:"F d, Y" }} at {{ order.created_at|date:"h:i A" }}
+            </p>
+          </div>
+          <a href="{% url 'download_invoice' order.id %}" class="btn btn-outline-primary btn-sm align-self-md-start">
+            <i class="bi bi-download me-1"></i> Download PDF Invoice
+          </a>
+        </div>
+
+        <div class="card-body">
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Customer</dt>
+                <dd class="col-sm-7">{{ order.user.get_full_name|default:order.user.username }}</dd>
+                <dt class="col-sm-5">Status</dt>
+                <dd class="col-sm-7">
+                  <span class="badge bg-info text-dark">{{ order.get_status_display }}</span>
+                </dd>
+                <dt class="col-sm-5">Coupon</dt>
+                <dd class="col-sm-7">{{ order.coupon_code|default:"None" }}</dd>
+                <dt class="col-sm-5">Order Total</dt>
+                <dd class="col-sm-7 fw-semibold">$ {{ order.total_amount|floatformat:2 }}</dd>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <h2 class="h6">Shipping Address</h2>
+              <address class="mb-0">{{ order.shipping_address|linebreaksbr }}</address>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="progress" style="height: 10px">
+              {% widthratio current_status_index 2 100 as progress_width %}
+              <div class="progress-bar" style="width: {{ progress_width }}%"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+              {% for key, label in statuses %}
+                <span class="{% if forloop.counter0 <= current_status_index %}fw-semibold text-primary{% endif %}">
+                  {{ label }}
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <h2 class="h5 mb-3">Order Items</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th class="text-end">Qty</th>
+                  <th class="text-end">Unit Price</th>
+                  <th class="text-end">Line Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items.all %}
+                  <tr>
+                    <td>
+                      {% if item.product %}
+                        <a href="{% url 'product_detail' item.product.pk %}">{{ item.product.name }}</a>
+                      {% else %}
+                        Product unavailable
+                      {% endif %}
+                    </td>
+                    <td class="text-end">{{ item.quantity }}</td>
+                    <td class="text-end">$ {{ item.price|floatformat:2 }}</td>
+                    <td class="text-end">$ {{ item.get_total_price|floatformat:2 }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row justify-content-end">
+            <div class="col-md-5">
+              <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Subtotal</span>
+                  <strong>$ {{ subtotal|floatformat:2 }}</strong>
+                </li>
+                {% if order.discount_applied > 0 %}
+                  <li class="list-group-item d-flex justify-content-between text-success">
+                    <span>Discount ({{ order.coupon_code }})</span>
+                    <strong>-$ {{ order.discount_applied|floatformat:2 }}</strong>
+                  </li>
+                {% endif %}
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Tax</span>
+                  <strong>$ {{ order.tax_amount|floatformat:2 }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>Shipping</span>
+                  <strong>$ {{ order.shipping_charge|floatformat:2 }}</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between bg-light">
+                  <span class="fw-bold">Grand Total</span>
+                  <strong>$ {{ order.total_amount|floatformat:2 }}</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer text-center">
+          <a href="{% url 'order_history' %}" class="btn btn-secondary">Back to Order History</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

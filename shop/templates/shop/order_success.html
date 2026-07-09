@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Order Successful | Ecommerce Store{% endblock %}
+
+{% block content %}
+<section class="container my-5 text-center">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem"></i>
+          <h1 class="h2 mt-3">Thank You For Your Order!</h1>
+          <p class="lead">
+            Your order <strong>#{{ order.id }}</strong> has been placed successfully.
+          </p>
+          <p class="text-muted">
+            A confirmation email has been printed to the development console. You can view your order details, track status, or download a PDF invoice.
+          </p>
+          <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <a href="{% url 'order_detail' order.id %}" class="btn btn-primary">View Order Details</a>
+            <a href="{% url 'download_invoice' order.id %}" class="btn btn-outline-secondary">Download PDF Invoice</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
